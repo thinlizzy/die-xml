@@ -14,7 +14,7 @@ public:
 		swap(FreeStorePolicy(policy));
 		return *this;
 	}
-	void swap(FreeStorePolicy && other) throw() { data.swap(std::move(other.data)); }
+	void swap(FreeStorePolicy && other) throw() { data.swap(other.data); }
 	void setValue(T const & value) {
 		if( data ) {
 			*data = value;

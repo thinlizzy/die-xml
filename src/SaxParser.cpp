@@ -220,7 +220,7 @@ void Parser::parse(std::istream & is)
 	parser_state = prologue;
 	event_state = no_event;
 	buffer.clear();
-	tags.swap(TagStack());
+	TagStack().swap(tags);		// only vs 2010 supports swap to rvalues on std::stack
 
 	auto consumer = parserAut.getConsumer();
 	IteratorHelper ih(buffer,event_state,consumer,is);

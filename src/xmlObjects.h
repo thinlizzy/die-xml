@@ -11,8 +11,8 @@ struct Attribute {
 	std::string value;
 	void swap(Attribute && other) throw()
 	{
-		name.swap(std::move(other.name));
-		value.swap(std::move(other.value));
+		name.swap(other.name);
+		value.swap(other.value);
 	}
 };
 

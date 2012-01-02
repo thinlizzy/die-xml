@@ -135,7 +135,7 @@ public:
 
 	class Consumer {
 		friend Consumer FiniteAutomata::getConsumer();
-		friend class output_iterator;
+		friend class FiniteAutomata::output_iterator;
 		N const * node;
 		Consumer(N const * node): node(node) {}
 	public:
@@ -151,7 +151,7 @@ public:
 		bool final() const { return node && node->final; }
 	};
 
-	class output_iterator {
+	class output_iterator: public std::iterator<std::output_iterator_tag,C> {
 		Consumer consumer;
 
 		struct RefProxy {
@@ -192,6 +192,23 @@ bool operator<(Range<C> const & r1, Range<C> const & r2) { return r1.b < r2.a; }
 //bool operator<(Range<C> const & r1, Range<C> const & r2) { return r1.a < r2.a && r1.b < r2.b; }
 //bool operator<(Range<C> const & r1, Range<C> const & r2) { return r1.a < r2.a && r2.b < r1.b; }
 
+template<typename C, template<class> class TR>
+struct TTraits {
+	typedef typename TR<Range<C>>::output_type output_type;
+	static void setOutput(TR<Range<C>> & tr, output_type const * output)
+	{
+		if( output != 0 ) {
+			tr.output = *output;
+		}
+	}
+};
+
+template<typename C>
+struct TTraits<C,BasicTransition> {
+	typedef void * output_type;
+	static void setOutput(BasicTransition<Range<C>> & tr, output_type const * output) {}
+};
+
 template<typename C, template<class> class TR = BasicTransition>
 class RangeSetter {
 	typedef TR<Range<C>> Transition;
@@ -200,47 +217,30 @@ class RangeSetter {
 	char ch1;
 	FiniteAutomata<char,MealyTransition<char>> parser;
 
-	template<template<class> class TR>
-	struct TTraits {
-		typedef typename TR<Range<C>>::output_type output_type;
-		static void setOutput(TR<Range<C>> & tr, output_type const * output) 
-		{ 
-			if( output != 0 ) {
-				tr.output = *output;
-			}
-		}
-	};
-
-	template<>
-	struct TTraits<BasicTransition> {
-		typedef void * output_type;
-		static void setOutput(TR<Range<C>> & tr, output_type const * output) {}
-	};
-
-	void addTrans(typename Automata::KeyType const & src, Range<C> range, typename Automata::KeyType const & dest, typename TTraits<TR>::output_type const * output)
+	void addTrans(typename Automata::KeyType const & src, Range<C> range, typename Automata::KeyType const & dest, typename TTraits<C,TR>::output_type const * output)
 	{
 		auto & tr = this->automata.setTrans(src,range,dest);
-		TTraits<TR>::setOutput(tr,output);
+		TTraits<C,TR>::setOutput(tr,output);
 	}
 
-	void buildParser(typename Automata::KeyType const & src, typename Automata::KeyType const & dest, typename TTraits<TR>::output_type const * output)
+	void buildParser(typename Automata::KeyType const & src, typename Automata::KeyType const & dest, typename TTraits<C,TR>::output_type const * output)
 	{
 		parser.getNode("start").defaultTransition = [this](char ch) -> FiniteAutomata<char,MealyTransition<char>>::NodeType * {
-			ch1 = ch;
-			return &parser.getNode("ch1");
+			this->ch1 = ch;
+			return &this->parser.getNode("ch1");
 		};
 
 		parser.setTrans("ch1",'-',"ch2");
 		parser.getNode("ch1").defaultTransition = [=,this](char ch) -> FiniteAutomata<char,MealyTransition<char>>::NodeType * {
-			addTrans(src,ch1,dest,output);
-			ch1 = ch;
-			return &parser.getNode("ch1");
+			this->addTrans(src,this->ch1,dest,output);
+			this->ch1 = ch;
+			return &this->parser.getNode("ch1");
 		};
 
 		parser.getNode("ch2").defaultTransition = [=,this](char ch) -> FiniteAutomata<char,MealyTransition<char>>::NodeType * {
-			addTrans(src,Range<C>(ch1,ch),dest,output);
-			ch1 = 0;
-			return &parser.getNode("start");
+			this->addTrans(src,Range<C>(this->ch1,ch),dest,output);
+			this->ch1 = 0;
+			return &this->parser.getNode("start");
 		};
 
 		parser.setStart("start");
@@ -248,7 +248,7 @@ class RangeSetter {
 		parser.getNode("ch1").final = true;
 	}
 
-	void do_setTrans(typename Automata::KeyType const & src, std::string const & ranges, typename Automata::KeyType const & dest, typename TTraits<TR>::output_type const * output)
+	void do_setTrans(typename Automata::KeyType const & src, std::string const & ranges, typename Automata::KeyType const & dest, typename TTraits<C,TR>::output_type const * output)
 	{
 		ch1 = 0;
 		buildParser(src,dest,output);
@@ -271,7 +271,7 @@ public:
 		do_setTrans(src,ranges,dest,0);
 	}
 
-	void setTrans(typename Automata::KeyType const & src, std::string const & ranges, typename Automata::KeyType const & dest, typename TTraits<TR>::output_type const & output)
+	void setTrans(typename Automata::KeyType const & src, std::string const & ranges, typename Automata::KeyType const & dest, typename TTraits<C,TR>::output_type const & output)
 	{
 		do_setTrans(src,ranges,dest,&output);
 	}
