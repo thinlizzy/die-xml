@@ -9,6 +9,9 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
+    <Filter Include="util">
+      <UniqueIdentifier>{e53b487d-32da-4375-a7aa-3ee4951c93a2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\SaxParser.cpp">
@@ -27,6 +30,12 @@
     </ClInclude>
     <ClInclude Include="..\..\src\SaxIterators.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\util\automata.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\util\optional.h">
+      <Filter>util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -18,6 +18,8 @@
     <ClInclude Include="..\..\src\SaxIterators.h" />
     <ClInclude Include="..\..\src\SaxParser.h" />
     <ClInclude Include="..\..\src\xmlObjects.h" />
+    <ClInclude Include="..\..\util\automata.h" />
+    <ClInclude Include="..\..\util\optional.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{BA183E38-3445-4EAC-B11D-DF675A518090}</ProjectGuid>

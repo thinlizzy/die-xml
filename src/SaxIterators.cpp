@@ -50,6 +50,17 @@ AttributeIterator::~AttributeIterator()
 	ih.drain();
 }
 
+//* TODO VS ISSUE waiting for a new VS version
+optional<Attribute,AutomaticStoragePolicy<Attribute>> AttributeIterator::getNext()
+{
+	Attribute result;
+	if( ! pull(attr_name) ) return optional<Attribute,AutomaticStoragePolicy<Attribute>>();
+	result.name = ih.buffer;
+	if( ! pull(attr_value) ) return optional<Attribute,AutomaticStoragePolicy<Attribute>>();
+	result.value = ih.buffer;
+	return result;
+}
+/*/
 optional<Attribute,AutomaticStoragePolicy> AttributeIterator::getNext()
 {
 	Attribute result;
@@ -59,6 +70,7 @@ optional<Attribute,AutomaticStoragePolicy> AttributeIterator::getNext()
 	result.value = ih.buffer;
 	return result;
 }
+//*/
 
 bool AttributeIterator::pull(EventState evt)
 {

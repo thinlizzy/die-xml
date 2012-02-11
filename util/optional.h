@@ -51,9 +51,40 @@ public:
 
 // TODO make conversion operators
 
-template<typename T, template<typename> class StoragePolicy = FreeStorePolicy>
+//* TODO VS ISSUE waiting for a new VS version
+template<typename T, bool big>
+struct StoragePolicyTraits {
+	typedef FreeStorePolicy<T> type;
+};
+
+template<typename T>
+struct StoragePolicyTraits<T,false> {
+	typedef AutomaticStoragePolicy<T> type;
+};
+
+template<typename T, typename StoragePolicy = StoragePolicyTraits<T,(sizeof(T) > sizeof(T*))>::type>
+class optional {
+	StoragePolicy storage;
+
+/*/
+template<typename T, bool big>
+struct StoragePolicyTraits {
+	//template <class T> using type = FreeStorePolicy<T>;
+	template <typename U = T> struct type : FreeStorePolicy<U> { };
+};
+
+
+
+template<typename T>
+struct StoragePolicyTraits<T,false> {
+	//template <class T> using type = AutomaticStoragePolicy<T>;
+	template <typename U = T> struct type : AutomaticStoragePolicy<U> { };
+};
+
+template<typename T, template<typename> class StoragePolicy = StoragePolicyTraits<T,(sizeof(T) > sizeof(T*))>::template type>  // VS ISSUE
 class optional {
 	StoragePolicy<T> storage;
+//*/
 public:
 	optional() {}
 

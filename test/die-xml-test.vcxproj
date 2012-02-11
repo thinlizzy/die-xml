@@ -16,7 +16,7 @@
     <ClCompile Include="src\testSaxParser.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{C76319E3-2D6E-4B0E-A7F6-5F7D677ACDE0}</ProjectGuid>
+    <ProjectGuid>{95973CA5-1B6C-4BD3-9FD0-F714E29DF091}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>test</RootNamespace>
   </PropertyGroup>
