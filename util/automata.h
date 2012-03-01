@@ -258,9 +258,8 @@ class RangeSetter {
 	{
 		ch1 = 0;
 		buildParser(src,dest,output);
-		assert(
-			parser.consume(ranges.begin(),ranges.end())
-		);
+		bool consumed = parser.consume(ranges.begin(),ranges.end());	// had to use a separate var due to damned VC++
+		assert(consumed);
 		
 		if( ch1 != 0 ) {	// add empilhado que sobrou
 			addTrans(src,ch1,dest,output);
