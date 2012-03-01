@@ -62,7 +62,7 @@ struct StoragePolicyTraits<T,false> {
 	typedef AutomaticStoragePolicy<T> type;
 };
 
-template<typename T, typename StoragePolicy = StoragePolicyTraits<T,(sizeof(T) > sizeof(T*))>::type>
+template<typename T, typename StoragePolicy = typename StoragePolicyTraits<T,(sizeof(T) > sizeof(T*))>::type>
 class optional {
 	StoragePolicy storage;
 
