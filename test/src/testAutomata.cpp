@@ -165,7 +165,25 @@ namespace tut {
     template<> 
     void testobject::test<7>() 
     {
-        set_test_name("range setter");
+        set_test_name("range setter and consumers");
+
+		using namespace automata;
+
+		FiniteAutomata<Range<char>> automata1;
+		RangeSetter<char> rs(automata1);
+		rs.setTrans("start","abc","start");
+		rs.setTrans("start","1-9","end");
+		rs.setTrans("end","1-9","end");
+
+		ensure_equals(automata1.getNode("start").transitions.size(),4);
+		ensure_equals(automata1.getNode("end").transitions.size(),1);
+	}
+
+    template<> 
+    template<> 
+    void testobject::test<8>() 
+    {
+        set_test_name("range setter and consumers");
 
 		using namespace automata;
 
@@ -179,6 +197,15 @@ namespace tut {
 		automata1.getNode("end").final = true;
 
 		std::string input = "acacab1323";
+		// first test consumer
+		std::istringstream iss(input);
+		auto consumer = automata1.getConsumer();
+		char ch;
+		while( iss.get(ch) ) {
+			ensure(consumer.consume(ch));
+		}
+		ensure(consumer.final());
+		// after test iterator (consumer wrapper)
 		auto outIt = automata1.output();
 		outIt = std::copy(input.begin(),input.end(),outIt);
 		ensure(outIt);
@@ -186,7 +213,7 @@ namespace tut {
 
     template<> 
     template<> 
-    void testobject::test<8>() 
+    void testobject::test<9>() 
     {
         set_test_name("range setter with output");
 

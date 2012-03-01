@@ -7,6 +7,8 @@
 #include <utility>
 #include <functional>
 #include <cassert>
+// debug
+//#include <iostream>
 
 namespace automata {
 
@@ -62,6 +64,8 @@ public:
 	{
 		defaultTransition = [](C s) -> Node * { return 0; };
 	}
+
+	KeyType const & getName() const { return name; }
 
 	Node const * transit(C s) const
 	{
@@ -141,8 +145,10 @@ public:
 	public:
 		bool consume(C s)
 		{
+			//std::cout << "consumindo ch " << s << " node = " << (node ? node->getName() : "nil") << std::endl;
 			if( ! node ) return false;
 			node = node->transit(s);
+			//std::cout << "transited to " << (node ? node->getName() : "nil") << std::endl;
 			return node;
 		}
 
@@ -152,19 +158,19 @@ public:
 	};
 
 	class output_iterator: public std::iterator<std::output_iterator_tag,C> {
-		Consumer consumer;
-
 		struct RefProxy {
-			Consumer & consumer;
-			RefProxy(Consumer & consumer): consumer(consumer) {}
+			Consumer consumer;
+			RefProxy(N const * node): consumer(node) {}
 			RefProxy & operator=(C s) { consumer.consume(s); return *this; }
 		};
+
+		RefProxy refProxy;
 	public:
-		output_iterator(N const * node): consumer(node) {}
+		output_iterator(N const * node): refProxy(node) {}
 		output_iterator & operator++() { return *this; }
-		RefProxy operator*() { return RefProxy(consumer); }
+		RefProxy & operator*() { return refProxy; }
 		// explicit operator bool() const { return ! consumer.fail(); }
-		operator void const *() const { return consumer.fail() ? 0 : this; }
+		operator void const *() const { return refProxy.consumer.fail() ? 0 : this; }
 	};
 
 	Consumer getConsumer()	
