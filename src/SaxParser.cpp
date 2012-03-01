@@ -292,6 +292,8 @@ void Parser::parse(std::istream & is)
 				}
 				elementFn(tagName,buffer);
 				break;
+
+			default: break;
 			}
 
 			if( event_state == empty_tag ) {

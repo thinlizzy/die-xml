@@ -114,8 +114,8 @@ namespace tut {
 				int found = 0;
 				auto attribute = it.getNext();
 				while( attribute && found < 2 ) {
-					if( attribute->name == "attr" && attribute->value == "10" ||
-						attribute->name == "cost" && attribute->value == "BBR"	) ++found;
+					if( (attribute->name == "attr" && attribute->value == "10") ||
+						(attribute->name == "cost" && attribute->value == "BBR") ) ++found;
 					attribute = it.getNext();
 				}
 				if( found != 2 ) throw xml::ABORTED;
