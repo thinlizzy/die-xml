@@ -254,8 +254,8 @@ bool Parser::parseContinue(std::istream & is)
 					tags.push(tagName);
 					{	AttributeIterator attrIt(ih);
 						if( parser_state <= start_document ) {
-							startDocFn(tagName,attrIt);
 							parser_state = inside_document;
+							startDocFn(tagName,attrIt);
 						} else {
 							startElementFn(tagName,attrIt);
 						}
@@ -266,8 +266,8 @@ bool Parser::parseContinue(std::istream & is)
 					if( tags.empty() || tags.top() != tagName ) throw TAG_MISMATCH;
 					tags.pop();
 					if( tags.empty() ) {
-						endDocFn(tagName);
 						parser_state = end_document;
+						endDocFn(tagName);
 					} else {
 						endElementFn(tagName);
 					}
@@ -316,7 +316,14 @@ bool Parser::parseContinue(std::istream & is)
 			}
 		}
 	} catch(xml::Exception ex) {
-		if( ex == ABORTED ) return true;
+		if( ex == ABORTED ) {
+			if( event_state == empty_tag ) {
+				event_state = end_tag;
+			} else {
+				event_state = no_event;
+			}
+			return true;
+		}
 		throw;
 	}
 }

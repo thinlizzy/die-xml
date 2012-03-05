@@ -329,5 +329,25 @@ namespace tut {
 		}
 	}
 
+    template<> 
+    template<> 
+    void testobject::test<16>() 
+    {
+		using namespace xml::sax;
+        set_test_name("abort and continue");
+		std::istringstream ss(
+			"<root naosei='20'>\n"
+				"<fieldtag>aah1</fieldtag>"
+				"<fieldtag>aah2</fieldtag>"
+			"</root>");
+		parser.endTag([&](Parser::TagType const & name) {
+			if( name == "fieldtag" ) throw xml::ABORTED;
+		});
+
+		ensure_equals( parser.parse(ss), true );
+		ensure_equals( parser.parseContinue(ss), true );
+		ensure_equals( parser.parseContinue(ss), false );
+	}
+
 
 }
