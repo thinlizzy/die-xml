@@ -30,6 +30,7 @@ private:
 	processing_instruction_event elementFn;
 
 	ParserAutomata parserAut;
+	ParserAutomata::Consumer consumer;
 	EventState event_state;
 	std::string buffer;
 	TagType tagName;
@@ -49,7 +50,9 @@ public:
 	Parser & processingInstruction(processing_instruction_event fn);
 	Parser & element(processing_instruction_event fn);
 
-	void parse(std::istream & is);
+	bool parse(std::istream & is);
+	void clear();
+	bool parseContinue(std::istream & is);
 };
 
 

@@ -268,4 +268,66 @@ namespace tut {
 		ensure_equals(texto,"ai [[didi]]""depois");
 	}
 
+    template<> 
+    template<> 
+    void testobject::test<14>() 
+    {
+        set_test_name("not aborted");
+		std::istringstream ss("<root></root>  ");
+		ensure_not(parser.parse(ss));
+	}
+
+    template<> 
+    template<> 
+    void testobject::test<15>() 
+    {
+		using namespace xml::sax;
+        set_test_name("abort and continue");
+		std::istringstream ss(
+			"<root naosei='20'>\n"
+				"<tag1>aah</tag1>"
+				"<tagdef tagName='superTag' other='dsfsdfs' another='xxx' />    "
+				"<otherTag>irrelevant text</otherTag>   "
+				"<superTag>this is the answer</superTag>"
+				"<tag2>bah</tag2>"
+			"</root>");
+		std::string tagName;
+		parser.startTag([&](Parser::TagType const & name, AttributeIterator & it) {
+			if( name == "tagdef" ) {
+				for( auto attribute = it.getNext(); attribute; attribute = it.getNext() ) {
+					if( attribute->name == "tagName" ) {
+						tagName = attribute->value;
+						throw xml::ABORTED;
+					}
+				}
+			}
+		});
+
+		if( parser.parse(ss) ) {
+			bool getText = false;
+			std::string texto;
+			parser.startTag([&](Parser::TagType const & name, AttributeIterator & it) {
+				if( name == tagName ) {
+					getText = true;
+				}
+			});
+			parser.endTag([&](Parser::TagType const & name) {
+				if( name == tagName ) throw xml::ABORTED;
+			});
+			parser.characters([&](CharIterator & it) {
+				if( getText ) {
+					texto += it.getText();
+				}
+			});
+			if( parser.parseContinue(ss) ) {
+				ensure_equals(texto,"this is the answer");
+			} else {
+				fail("parsing was not aborted on second time");
+			}
+		} else {
+			fail("parsing was not aborted on first time");
+		}
+	}
+
+
 }

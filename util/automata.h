@@ -138,11 +138,11 @@ public:
 	}
 
 	class Consumer {
-		friend Consumer FiniteAutomata::getConsumer();
-		friend class FiniteAutomata::output_iterator;
 		N const * node;
-		Consumer(N const * node): node(node) {}
 	public:
+		Consumer(): node(0) {}
+		Consumer(N const * node): node(node) {}
+
 		bool consume(C s)
 		{
 			//std::cout << "consumindo ch " << s << " node = " << (node ? node->getName() : "nil") << std::endl;

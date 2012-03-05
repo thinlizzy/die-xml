@@ -215,94 +215,109 @@ Parser & Parser::endDocument(end_tag_event fn) { SR(endDocFn) }
 Parser & Parser::processingInstruction(processing_instruction_event fn) { SR(procInstrFn) }
 Parser & Parser::element(processing_instruction_event fn) { SR(elementFn) }
 
-void Parser::parse(std::istream & is)
+void Parser::clear()
 {
 	parser_state = prologue;
 	event_state = no_event;
 	buffer.clear();
 	TagStack().swap(tags);		// only vs 2010 supports swap to rvalues on std::stack
 
-	auto consumer = parserAut.getConsumer();
+	consumer = parserAut.getConsumer();
+}
+
+bool Parser::parse(std::istream & is)
+{
+	clear();
+	return parseContinue(is);
+}
+
+bool Parser::parseContinue(std::istream & is)
+{
 	IteratorHelper ih(buffer,event_state,consumer,is);
-	for(;;) {
-		int ch = is.get();
-		if( ch == std::char_traits<char>::eof() ) {
-			if( consumer.final() && parser_state == end_document ) return;
-			throw PREMATURE_EOF;
-		}
-		if( ! consumer.consume(ch) ) throw MALFORMED;
+	try {
+		for(;;) {
+			int ch = is.get();
+			if( ch == std::char_traits<char>::eof() ) {
+				if( consumer.final() && parser_state == end_document ) return false;
+				throw PREMATURE_EOF;
+			}
+			if( ! consumer.consume(ch) ) throw MALFORMED;
 
-		while( event_state != no_event ) {
-			if( parser_state == end_document ) throw EXTRA;
+			while( event_state != no_event ) {
+				if( parser_state == end_document ) throw EXTRA;
 
-			switch(event_state) {
-			case empty_tag:
-				// o mesmo que start_tag, mas depois fará end_tag
-			case start_tag:
-			case start_attribute:
-				tags.push(tagName);
-				{	AttributeIterator attrIt(ih);
-					if( parser_state <= start_document ) {
-						startDocFn(tagName,attrIt);
-						parser_state = inside_document;
-					} else {
-						startElementFn(tagName,attrIt);
+				switch(event_state) {
+				case empty_tag:
+					// o mesmo que start_tag, mas depois fará end_tag
+				case start_tag:
+				case start_attribute:
+					tags.push(tagName);
+					{	AttributeIterator attrIt(ih);
+						if( parser_state <= start_document ) {
+							startDocFn(tagName,attrIt);
+							parser_state = inside_document;
+						} else {
+							startElementFn(tagName,attrIt);
+						}
 					}
+
+					break;
+				case end_tag:
+					if( tags.empty() || tags.top() != tagName ) throw TAG_MISMATCH;
+					tags.pop();
+					if( tags.empty() ) {
+						endDocFn(tagName);
+						parser_state = end_document;
+					} else {
+						endElementFn(tagName);
+					}
+					break;
+				case start_chars:
+					{	CharIterator charIt(ih);
+						charactersFn(charIt);
+					}
+					break;
+				case special_element:
+					if( tagName == "CDATA" ) {
+						CharIterator charIt(ih);
+						charactersFn(charIt);
+					} else {
+						throw UNSUPPORTED;				// TODO improve this to support conditionals
+					}
+					break;
+
+				case processing_instruction:
+					if( tagName == "xml" ) {
+						if( parser_state != prologue ) throw MALFORMED;
+						parser_state = doctype;
+						// TODO interpretar encoding e criar decoders
+					}
+					procInstrFn(tagName,buffer);
+					break;
+
+				case element_notation:
+					if( tagName == "DOCTYPE" ) {
+						if( parser_state != doctype ) throw MALFORMED;
+						parser_state = start_document;
+						// TODO interpretar DOCTYPE
+					}
+					elementFn(tagName,buffer);
+					break;
+
+				default: break;
 				}
 
-				break;
-			case end_tag:
-				if( tags.empty() || tags.top() != tagName ) throw TAG_MISMATCH;
-				tags.pop();
-				if( tags.empty() ) {
-					endDocFn(tagName);
-					parser_state = end_document;
+				if( event_state == empty_tag ) {
+					event_state = end_tag;
 				} else {
-					endElementFn(tagName);
+					event_state = no_event;
 				}
-				break;
-			case start_chars:
-				{	CharIterator charIt(ih);
-					charactersFn(charIt);
-				}
-				break;
-			case special_element:
-				if( tagName == "CDATA" ) {
-					CharIterator charIt(ih);
-					charactersFn(charIt);
-				} else {
-					throw UNSUPPORTED;				// TODO improve this to support conditionals
-				}
-				break;
-
-			case processing_instruction:
-				if( tagName == "xml" ) {
-					if( parser_state != prologue ) throw MALFORMED;
-					parser_state = doctype;
-					// TODO interpretar encoding e criar decoders
-				}
-				procInstrFn(tagName,buffer);
-				break;
-
-			case element_notation:
-				if( tagName == "DOCTYPE" ) {
-					if( parser_state != doctype ) throw MALFORMED;
-					parser_state = start_document;
-					// TODO interpretar DOCTYPE
-				}
-				elementFn(tagName,buffer);
-				break;
-
-			default: break;
-			}
-
-			if( event_state == empty_tag ) {
-				event_state = end_tag;
-			} else {
-				event_state = no_event;
-			}
 				
+			}
 		}
+	} catch(xml::Exception ex) {
+		if( ex == ABORTED ) return true;
+		throw;
 	}
 }
 
