@@ -231,6 +231,18 @@ bool Parser::parse(std::istream & is)
 	return parseContinue(is);
 }
 
+struct EventStateFixer {
+	EventState & event_state;
+	EventStateFixer(EventState & event_state): event_state(event_state) {}
+	~EventStateFixer() {
+		if( event_state == empty_tag ) {
+			event_state = end_tag;
+		} else {
+			event_state = no_event;
+		}
+	}
+};
+
 bool Parser::parseContinue(std::istream & is)
 {
 	IteratorHelper ih(buffer,event_state,consumer,is);
@@ -244,6 +256,8 @@ bool Parser::parseContinue(std::istream & is)
 			if( ! consumer.consume(ch) ) throw MALFORMED;
 
 			while( event_state != no_event ) {
+				EventStateFixer evtFixer(event_state);
+
 				if( parser_state == end_document ) throw EXTRA;
 
 				switch(event_state) {
@@ -306,24 +320,10 @@ bool Parser::parseContinue(std::istream & is)
 
 				default: break;
 				}
-
-				if( event_state == empty_tag ) {
-					event_state = end_tag;
-				} else {
-					event_state = no_event;
-				}
-				
 			}
 		}
 	} catch(xml::Exception ex) {
-		if( ex == ABORTED ) {
-			if( event_state == empty_tag ) {
-				event_state = end_tag;
-			} else {
-				event_state = no_event;
-			}
-			return true;
-		}
+		if( ex == ABORTED ) return true;
 		throw;
 	}
 }

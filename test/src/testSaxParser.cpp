@@ -336,7 +336,7 @@ namespace tut {
 		using namespace xml::sax;
         set_test_name("abort and continue");
 		std::istringstream ss(
-			"<root naosei='20'>\n"
+			"<root>"
 				"<fieldtag>aah1</fieldtag>"
 				"<fieldtag>aah2</fieldtag>"
 			"</root>");
