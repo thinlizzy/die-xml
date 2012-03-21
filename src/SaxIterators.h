@@ -33,11 +33,7 @@ class AttributeIterator {
 public:
 	AttributeIterator(IteratorHelper & ih);
 	~AttributeIterator();
-	/* TODO VS ISSUE waiting for a new VS version
-	optional<Attribute,AutomaticStoragePolicy> getNext();		
-	/*/
-	optional<Attribute,AutomaticStoragePolicy<Attribute>> getNext();
-	//*/
+	basic_optional<Attribute,AutomaticStoragePolicy> getNext();		
 	std::vector<Attribute> getAttributes();
 };
 

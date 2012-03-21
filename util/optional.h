@@ -51,47 +51,84 @@ public:
 
 // TODO make conversion operators
 
-//* TODO VS ISSUE waiting for a new VS version
-template<typename T, bool big>
+template<typename T, bool freestore>
 struct StoragePolicyTraits {
-	typedef FreeStorePolicy<T> type;
+	template <typename U = T> struct type : FreeStorePolicy<U> { type() {}; type(U const & value): FreeStorePolicy<U>(value) {} };
 };
 
 template<typename T>
 struct StoragePolicyTraits<T,false> {
-	typedef AutomaticStoragePolicy<T> type;
+	template <typename U = T> struct type : AutomaticStoragePolicy<U> { type() {}; type(U const & value): AutomaticStoragePolicy<U>(value) {} };
 };
 
-template<typename T, typename StoragePolicy = typename StoragePolicyTraits<T,(sizeof(T) > sizeof(T*))>::type>
-class optional {
-	StoragePolicy storage;
+template<typename T, template<typename> class StoragePolicy>
+class basic_optional {
+	StoragePolicy<T> storage;
+public:
+	basic_optional() {}
 
-/*/
+	basic_optional(T const & value):
+		storage(value)
+	{}
+
+	void swap(basic_optional && opt) throw()
+	{
+		storage.swap(std::move(opt.storage));
+	}
+
+	basic_optional & operator=(T const & value) 
+	{
+		storage.setValue(value);
+		return *this;
+	}
+
+	T & operator*() { return *storage; }
+	T const & operator*() const { return *storage; }
+	T * operator->() { return storage.operator->(); }
+	T const * operator->() const { return storage.operator->(); }
+
+	operator void const * () const { return operator->(); }
+	bool operator!() const { return operator->() == 0; }
+};
+
+template<typename T>
+class optional: public basic_optional<T, StoragePolicyTraits<T,(sizeof(T) > sizeof(T*))>::template type>  {
+public:
+	optional() {}
+
+	optional(T const & value):
+		basic_optional(value)
+	{}
+
+	optional & operator=(T const & value) 
+	{
+		basic_optional::operator=(value);
+		return *this;
+	}
+};
+
+// TODO test this gcc code
+
+/*
 template<typename T, bool big>
 struct StoragePolicyTraits {
-	//template <class T> using type = FreeStorePolicy<T>;
-	template <typename U = T> struct type : FreeStorePolicy<U> { };
+	template <class T> using type = FreeStorePolicy<T>;
 };
-
-
 
 template<typename T>
 struct StoragePolicyTraits<T,false> {
-	//template <class T> using type = AutomaticStoragePolicy<T>;
-	template <typename U = T> struct type : AutomaticStoragePolicy<U> { };
+	template <class T> using type = AutomaticStoragePolicy<T>;
 };
 
-template<typename T, template<typename> class StoragePolicy = StoragePolicyTraits<T,(sizeof(T) > sizeof(T*))>::template type>  // VS ISSUE
+template<typename T, template<typename> class StoragePolicy = StoragePolicyTraits<T,(sizeof(T) > sizeof(T*))>::template type>
 class optional {
 	StoragePolicy<T> storage;
-//*/
 public:
 	optional() {}
 
 	optional(T const & value):
 		storage(value)
-	{
-	}
+	{}
 
 	void swap(optional && opt) throw()
 	{
@@ -112,5 +149,6 @@ public:
 	operator void const * () const { return operator->(); }
 	bool operator!() const { return operator->() == 0; }
 };
+*/
 
 #endif

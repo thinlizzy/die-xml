@@ -50,27 +50,15 @@ AttributeIterator::~AttributeIterator()
 	ih.drain();
 }
 
-//* TODO VS ISSUE waiting for a new VS version
-optional<Attribute,AutomaticStoragePolicy<Attribute>> AttributeIterator::getNext()
+basic_optional<Attribute,AutomaticStoragePolicy> AttributeIterator::getNext()
 {
 	Attribute result;
-	if( ! pull(attr_name) ) return optional<Attribute,AutomaticStoragePolicy<Attribute>>();
+	if( ! pull(attr_name) ) return basic_optional<Attribute,AutomaticStoragePolicy>();
 	result.name = ih.buffer;
-	if( ! pull(attr_value) ) return optional<Attribute,AutomaticStoragePolicy<Attribute>>();
+	if( ! pull(attr_value) ) return basic_optional<Attribute,AutomaticStoragePolicy>();
 	result.value = ih.buffer;
 	return result;
 }
-/*/
-optional<Attribute,AutomaticStoragePolicy> AttributeIterator::getNext()
-{
-	Attribute result;
-	if( ! pull(attr_name) ) return optional<Attribute,AutomaticStoragePolicy>();
-	result.name = ih.buffer;
-	if( ! pull(attr_value) ) return optional<Attribute,AutomaticStoragePolicy>();
-	result.value = ih.buffer;
-	return result;
-}
-//*/
 
 bool AttributeIterator::pull(EventState evt)
 {
