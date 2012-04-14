@@ -88,7 +88,19 @@ public:
 	T const * operator->() const { return storage.operator->(); }
 
 	operator void const * () const { return operator->(); }
+	//operator bool const () { return operator->() != 0; }
 	bool operator!() const { return operator->() == 0; }
+
+	bool operator==(basic_optional const & opt) const
+	{
+		auto hasValue = bool(operator const void *());
+		if( hasValue != bool(opt.operator const void *()) ) return false;
+		if( ! hasValue ) return true;
+
+		return operator*() == opt.operator*();
+	}
+
+	bool operator!=(basic_optional const & opt) const { return ! (*this == opt); }
 };
 
 template<typename T>
@@ -104,6 +116,16 @@ public:
 	{
 		basic_optional::operator=(value);
 		return *this;
+	}
+
+	bool operator==(optional const & opt) const
+	{
+		return basic_optional::operator==(opt);
+	}
+
+	bool operator!=(optional const & opt) const
+	{
+		return basic_optional::operator!=(opt);
 	}
 };
 
