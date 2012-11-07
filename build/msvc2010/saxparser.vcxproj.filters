@@ -20,6 +20,9 @@
     <ClCompile Include="..\..\src\SaxIterators.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\libmongoose\mongotest\src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\SaxParser.h">

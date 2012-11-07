@@ -35,9 +35,9 @@ class AutomaticStoragePolicy {
 public:
 	AutomaticStoragePolicy(): hasValue(false) {}
 	explicit AutomaticStoragePolicy(T const & value): hasValue(true), data(value) {}
-	void swap(AutomaticStoragePolicy && other) throw() { 
-		std::swap(hasValue,other.hasValue); 
-		std::swap(data,std::move(other.data)); 
+	void swap(AutomaticStoragePolicy && other) throw() {
+		std::swap(hasValue,other.hasValue);
+		std::swap(data,std::move(other.data));
 	}
 	void setValue(T const & value) {
 		hasValue = true;
@@ -51,6 +51,8 @@ public:
 
 // TODO make conversion operators
 
+/*
+
 template<typename T, bool freestore>
 struct StoragePolicyTraits {
 	template <typename U = T> struct type : FreeStorePolicy<U> { type() {}; type(U const & value): FreeStorePolicy<U>(value) {} };
@@ -60,6 +62,7 @@ template<typename T>
 struct StoragePolicyTraits<T,false> {
 	template <typename U = T> struct type : AutomaticStoragePolicy<U> { type() {}; type(U const & value): AutomaticStoragePolicy<U>(value) {} };
 };
+
 
 template<typename T, template<typename> class StoragePolicy>
 class basic_optional {
@@ -76,7 +79,7 @@ public:
 		storage.swap(std::move(opt.storage));
 	}
 
-	basic_optional & operator=(T const & value) 
+	basic_optional & operator=(T const & value)
 	{
 		storage.setValue(value);
 		return *this;
@@ -109,40 +112,40 @@ public:
 	optional() {}
 
 	optional(T const & value):
-		basic_optional(value)
+		basic_optional<T, StoragePolicyTraits<T,(sizeof(T) > sizeof(T*))>::template type>(value)
 	{}
 
-	optional & operator=(T const & value) 
+	optional & operator=(T const & value)
 	{
-		basic_optional::operator=(value);
+		basic_optional<T, StoragePolicyTraits<T,(sizeof(T) > sizeof(T*))>::template type>::operator=(value);
 		return *this;
 	}
 
 	bool operator==(optional const & opt) const
 	{
-		return basic_optional::operator==(opt);
+		return basic_optional<T, StoragePolicyTraits<T,(sizeof(T) > sizeof(T*))>::template type>::operator==(opt);
 	}
 
 	bool operator!=(optional const & opt) const
 	{
-		return basic_optional::operator!=(opt);
+		return basic_optional<T, StoragePolicyTraits<T,(sizeof(T) > sizeof(T*))>::template type>::operator!=(opt);
 	}
 };
 
-// TODO test this gcc code
+*/
 
-/*
-template<typename T, bool big>
+
+template<bool big>
 struct StoragePolicyTraits {
 	template <class T> using type = FreeStorePolicy<T>;
 };
 
-template<typename T>
-struct StoragePolicyTraits<T,false> {
+template<>
+struct StoragePolicyTraits<false> {
 	template <class T> using type = AutomaticStoragePolicy<T>;
 };
 
-template<typename T, template<typename> class StoragePolicy = StoragePolicyTraits<T,(sizeof(T) > sizeof(T*))>::template type>
+template<typename T, template<typename> class StoragePolicy = StoragePolicyTraits<(sizeof(T) > sizeof(T*))>::template type>
 class optional {
 	StoragePolicy<T> storage;
 public:
@@ -157,7 +160,7 @@ public:
 		storage.swap(std::move(opt.storage));
 	}
 
-	optional & operator=(T const & value) 
+	optional & operator=(T const & value)
 	{
 		storage.setValue(value);
 		return *this;
@@ -170,7 +173,16 @@ public:
 
 	operator void const * () const { return operator->(); }
 	bool operator!() const { return operator->() == 0; }
+
+	bool operator==(optional const & opt) const
+	{
+		auto hasValue = bool(operator const void *());
+		if( hasValue != bool(opt.operator const void *()) ) return false;
+		if( ! hasValue ) return true;
+
+		return operator*() == opt.operator*();
+	}
 };
-*/
+
 
 #endif

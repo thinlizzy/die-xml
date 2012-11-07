@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\libmongoose\mongotest\src\main.cpp" />
     <ClCompile Include="..\..\src\SaxIterators.cpp" />
     <ClCompile Include="..\..\src\SaxParser.cpp" />
   </ItemGroup>
