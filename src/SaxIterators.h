@@ -31,9 +31,11 @@ class AttributeIterator {
 	IteratorHelper & ih;
 	bool pull(EventState evt);
 public:
+	typedef optional<Attribute,AutomaticStoragePolicy> OptionalAttribute;
+    
 	AttributeIterator(IteratorHelper & ih);
 	~AttributeIterator();
-	basic_optional<Attribute,AutomaticStoragePolicy> getNext();		
+	OptionalAttribute getNext();		
 	std::vector<Attribute> getAttributes();
 };
 

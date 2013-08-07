@@ -50,12 +50,12 @@ AttributeIterator::~AttributeIterator()
 	ih.drain();
 }
 
-basic_optional<Attribute,AutomaticStoragePolicy> AttributeIterator::getNext()
+auto AttributeIterator::getNext() -> OptionalAttribute
 {
 	Attribute result;
-	if( ! pull(attr_name) ) return basic_optional<Attribute,AutomaticStoragePolicy>();
+	if( ! pull(attr_name) ) return OptionalAttribute();
 	result.name = ih.buffer;
-	if( ! pull(attr_value) ) return basic_optional<Attribute,AutomaticStoragePolicy>();
+	if( ! pull(attr_value) ) return OptionalAttribute();
 	result.value = ih.buffer;
 	return result;
 }
