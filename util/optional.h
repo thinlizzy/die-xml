@@ -2,6 +2,7 @@
 #define OPTIONAL_H_jjj54444409vgfdgkj234
 
 #include <memory>
+#include <ostream>
 
 template<typename T>
 class FreeStorePolicy {
@@ -10,10 +11,13 @@ public:
 	FreeStorePolicy() {}
 	explicit FreeStorePolicy(T const & value): data(new T(value)) {}
 	FreeStorePolicy(FreeStorePolicy const & policy): data( policy.data ? new T(*policy.data) : 0 ) {}
+    FreeStorePolicy(FreeStorePolicy &&) = default;
 	FreeStorePolicy & operator=(FreeStorePolicy const & policy) {
 		swap(FreeStorePolicy(policy));
 		return *this;
 	}
+	FreeStorePolicy & operator=(FreeStorePolicy &&) = default;
+    
 	void swap(FreeStorePolicy && other) throw() { data.swap(other.data); }
 	void setValue(T const & value) {
 		if( data ) {
@@ -184,5 +188,14 @@ public:
 	}
 };
 
+template<typename T>
+std::ostream & operator<<(std::ostream & os, optional<T> const & opt) {
+    if( opt ) {
+        os << *opt;
+    } else {
+        os << "nil";
+    }
+    return os;
+}
 
 #endif
