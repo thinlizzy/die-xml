@@ -1,9 +1,6 @@
-Welcome to die-xml, Diego's XML Parser
+Welcome to die-xml, which stands for Diego's XML Parser.
 
-This project is a simple XML parser that uses finite automata as the backend.
-The project page is located at
-http://code.google.com/p/die-xml/
-
+This project is a simple XML SAX parser that uses a finite automaton as the backend.
 
 *** HOW TO BUILD ***
 
@@ -24,5 +21,3 @@ you can open the die_xml.sln file in the build directory.
 
 
 Enjoy!
-   - the die-xml development team.
-
