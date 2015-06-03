@@ -19,5 +19,6 @@ system for your platform!
 For linux systems, you can now make the build directory.  For Windows systems,
 you can open the die_xml.sln file in the build directory.
 
+Testcases with some usage examples are presented in the die-xml-test directory, which can be built in the same way.
 
 Enjoy!
