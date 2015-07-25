@@ -8,5 +8,3 @@ if (UNIX OR CYGWIN)
 endif()
 
 add_subdirectory(src)
-add_subdirectory(test)
-
